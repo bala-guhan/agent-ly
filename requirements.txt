@@ -8,8 +8,13 @@ langchain-voyageai
 langchain-text-splitters
 langchain-community
 langgraph
+langgraph-checkpoint-postgres
 chromadb
 pypdf
 rank-bm25
 cohere
 supabase
+fastapi
+uvicorn[standard]
+psycopg2-binary
+sqlalchemy

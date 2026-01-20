@@ -6,6 +6,7 @@ from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 from langgraph.checkpoint.memory import MemorySaver
+import os
 
 from llm import LLMProvider
 from agent.tools import create_tools
@@ -75,7 +76,32 @@ class EnterpriseAgent:
         self.llm_model = llm_model
         self.llm = LLMProvider(provider=llm_provider, model=llm_model)
         self.tools = create_tools(llm_provider, llm_model)
-        self.memory = MemorySaver()
+        
+        # Use PostgreSQL checkpointer if DATABASE_URL is available, else fallback to MemorySaver
+        db_url = os.getenv("DATABASE_URL") or os.getenv("SUPABASE_DB_URL")
+        if db_url:
+            try:
+                # Try to use PostgreSQL checkpointer for persistent memory
+                from langgraph.checkpoint.postgres import PostgresSaver
+                # Create checkpointer instance (this is reusable and manages connections internally)
+                checkpointer = PostgresSaver.from_conn_string(db_url)
+                # Initialize tables (only needed once, safe to call multiple times)
+                # setup() creates tables if they don't exist
+                with checkpointer as cp:
+                    cp.setup()
+                # Store the checkpointer for use in graph compilation
+                self.memory = checkpointer
+                logger.info("✓ Using PostgreSQL checkpointer for persistent memory")
+            except ImportError:
+                logger.warning("PostgresSaver not available. Install langgraph-checkpoint-postgres. Falling back to MemorySaver.")
+                self.memory = MemorySaver()
+            except Exception as e:
+                logger.warning(f"Failed to initialize PostgreSQL checkpointer: {e}. Falling back to MemorySaver.")
+                self.memory = MemorySaver()
+        else:
+            self.memory = MemorySaver()
+            logger.info("Using MemorySaver (in-memory). Set DATABASE_URL or SUPABASE_DB_URL for persistent memory.")
+        
         self.graph = self._build_graph()
     
     def _build_graph(self):

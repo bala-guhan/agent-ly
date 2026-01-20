@@ -4,8 +4,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# ChromaDB Cloud Client
+# Get credentials from environment variables
 client = chromadb.CloudClient(
-  api_key=os.getenv('CHROMA_DB_API_KEY'),
-  tenant='cbc15610-38b7-4771-a196-bb607f72184f',
-  database='test-db'
+    api_key=os.getenv('CHROMA_DB_API_KEY'),
+    tenant=os.getenv('CHROMA_TENANT'),
+    database=os.getenv('CHROMA_DATABASE')
 )

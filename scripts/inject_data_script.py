@@ -5,14 +5,10 @@ from pathlib import Path
 parent_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(parent_dir))
 
-# Clean imports (using importlib for hyphenated filename)
-import importlib.util
-spec = importlib.util.spec_from_file_location("inject_data", parent_dir / "data_ingestion" / "inject-data.py")
-inject_data = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(inject_data)
-RAGSystem = inject_data.RAGSystem
+from data_ingestion.inject_data import RAGSystem
 
-rag = RAGSystem(collection_name="documents") 
+rag = RAGSystem(collection_name="documents", use_cloud=True)
+print("Using Cloud ChromaDB instance")
 
 data_files = list((parent_dir / "data").glob("*.txt"))
 print(f"Processing {len(data_files)} files...\n")

@@ -1,6 +1,7 @@
 import warnings
 import time
 from typing import List, Optional, Dict, Any
+from datetime import datetime
 from rag_query.hybrid_search import RAG
 from llm import LLMProvider
 from prompts.rag_query_prompt import get_rag_prompt
@@ -48,22 +49,31 @@ class RAGQuerySystem:
         self,
         question: str,
         k: int = 5,
-        rerank: bool = False
+        rerank: bool = False,
+        date_range: Optional[Dict[str, str]] = None,
+        recency_boost: bool = True
     ) -> Dict[str, Any]:
-        """
-        Query the RAG system and return answer with metadata.
+        """Query the RAG system and return answer with metadata.
         
         Args:
             question: User's question
             k: Number of chunks to retrieve
             rerank: Whether to use reranking
+            date_range: Optional dict with "start" and/or "end" dates for temporal filtering (ISO format: YYYY-MM-DD)
+            recency_boost: Whether to boost more recent documents
             
         Returns:
             Dictionary with answer, citations, and timing info
         """
         # Step 1: Retrieve chunks
         retrieval_start = time.time()
-        chunks = self.rag.query(question, k=k, rerank=rerank)
+        chunks = self.rag.query(
+            question, 
+            k=k, 
+            rerank=rerank,
+            date_range=date_range,
+            recency_boost=recency_boost
+        )
         retrieval_time = time.time() - retrieval_start
         
         if not chunks:

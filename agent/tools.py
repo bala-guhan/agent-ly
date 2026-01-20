@@ -1,4 +1,5 @@
 import warnings
+from typing import Optional
 from langchain_core.tools import tool
 from rag_query.rag_query_system import RAGQuerySystem
 from llm import LLMProvider
@@ -29,19 +30,36 @@ def create_tools(llm_provider: str, llm_model: str):
 
 
 @tool
-def rag_search(query: str) -> str:
-    """Search enterprise documents using RAG. Use this for questions about 2care company, products, services, or documentation.
+def rag_search(
+    query: str,
+    date_start: Optional[str] = None,
+    date_end: Optional[str] = None,
+    recency_boost: bool = True
+) -> str:
+    """Search enterprise documents using RAG for 2care questions.
     
     Args:
-        query: The search query about company, products, services, documentation, technical details, implementation guides, security, sales, etc. Must be a string.
+        query: Search query about company, products, services, documentation, etc.
+        date_start: Start date for filtering (ISO: YYYY-MM-DD). Only include when query mentions specific time period.
+        date_end: End date for filtering (ISO: YYYY-MM-DD). Only include when query mentions specific time period.
+        recency_boost: Boost recent documents (default: True).
     
     Returns:
-        str: The answer with citations from enterprise documents.
+        str: Answer with citations from documents.
     """
     if _rag_system is None:
         return "RAG system not initialized"
     
-    result = _rag_system.query(query, k=5)
+    # Prepare date range if provided
+    date_range = None
+    if date_start or date_end:
+        date_range = {}
+        if date_start and date_start.strip():
+            date_range["start"] = date_start.strip()
+        if date_end and date_end.strip():
+            date_range["end"] = date_end.strip()
+    
+    result = _rag_system.query(query, k=5, date_range=date_range, recency_boost=recency_boost)
     answer = result["answer"]
     citations = "\n".join([f"[{i+1}] {c['source']}" for i, c in enumerate(result["citations"])])
     return f"{answer}\n\nSources:\n{citations}"

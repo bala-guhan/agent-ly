@@ -20,7 +20,7 @@ class RAGSystem:
         chunk_size: int = 1000,
         chunk_overlap: int = 200,
         persist_directory: Optional[str] = None,
-        use_cloud: bool = False
+        use_cloud: bool = True  # Default to cloud
     ):
         if persist_directory is None:
             from pathlib import Path

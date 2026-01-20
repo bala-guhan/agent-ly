@@ -2,6 +2,7 @@ import warnings
 import os
 from dotenv import load_dotenv
 from typing import List, Dict, Optional, Any
+import chromadb
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
 
@@ -17,8 +18,10 @@ class VectorStore:
         collection_name: str,
         embedding_function,
         persist_directory: Optional[str] = None,
-        use_cloud: bool = False,
-        api_key: Optional[str] = None
+        use_cloud: bool = True,  # Default to cloud
+        api_key: Optional[str] = None,
+        tenant: Optional[str] = None,
+        database: Optional[str] = None
     ):
         self.collection_name = collection_name
         self.embedding_function = embedding_function
@@ -26,22 +29,34 @@ class VectorStore:
         self.use_cloud = use_cloud
         
         if use_cloud:
-            api_key = api_key or os.getenv("CHROMA_API_KEY")
+            import chromadb
+            
+            # Get credentials from environment or parameters
+            api_key = api_key or os.getenv("CHROMA_DB_API_KEY") or os.getenv("CHROMA_API_KEY")
+            tenant = tenant or os.getenv("CHROMA_TENANT")
+            database = database or os.getenv("CHROMA_DATABASE", "test-db")
+            
             if not api_key:
                 raise ValueError(
-                    "CHROMA_API_KEY not found. Required when use_cloud=True"
+                    "CHROMA_DB_API_KEY or CHROMA_API_KEY not found. Required when use_cloud=True"
                 )
-            self.client_settings = {
-                "chroma_api_impl": "rest",
-                "chroma_server_host": "api.trychroma.com",
-                "chroma_server_http_port": 443,
-                "chroma_server_ssl_enabled": True,
-            }
+            if not tenant:
+                raise ValueError(
+                    "CHROMA_TENANT not found. Required when use_cloud=True. "
+                    "Get it from your ChromaDB Cloud dashboard."
+                )
+            
+            # Use CloudClient for ChromaDB Cloud
+            client = chromadb.CloudClient(
+                api_key=api_key,
+                tenant=tenant,
+                database=database
+            )
+            
             self.vectorstore = Chroma(
                 collection_name=collection_name,
                 embedding_function=embedding_function,
-                client_settings=self.client_settings,
-                client_kwargs={"api_key": api_key}
+                client=client
             )
         else:
             self.vectorstore = Chroma(

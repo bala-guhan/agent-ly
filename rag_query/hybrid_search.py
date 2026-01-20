@@ -16,7 +16,7 @@ class RAG:
         embedding_provider: str = "voyage",
         embedding_model: str = "voyage-large-2",
         persist_directory: Optional[str] = None,
-        use_cloud: bool = False,
+        use_cloud: bool = True,  # Default to cloud
         use_reranker: bool = False
     ):
         if persist_directory is None:
@@ -54,19 +54,71 @@ class RAG:
             tokenized_docs = [re.findall(r'\w+', doc.lower()) for doc in documents]
             self._bm25_index = BM25Okapi(tokenized_docs)
     
-    def query(self, question: str, k: int = 4, filter: Optional[Dict[str, Any]] = None, rerank: bool = False, rerank_top_k: int = 20) -> List:
-        initial_k = rerank_top_k if (rerank or self.use_reranker) else k
-        results = self.vector_store.similarity_search(
-            query=question,
-            k=initial_k,
-            filter=filter
-        )
+    def query(
+        self, 
+        question: str, 
+        k: int = 4, 
+        filter: Optional[Dict[str, Any]] = None, 
+        rerank: bool = False, 
+        rerank_top_k: int = 20,
+        date_range: Optional[Dict[str, str]] = None,
+        recency_boost: bool = True
+    ) -> List:
+        from datetime import datetime
         
-        if not results:
-            return []
+        # Parse date range
+        date_start = date_end = None
+        if date_range:
+            try:
+                date_start = datetime.fromisoformat(date_range["start"]) if date_range.get("start") else None
+            except (ValueError, TypeError):
+                pass
+            try:
+                date_end = datetime.fromisoformat(date_range["end"]) if date_range.get("end") else None
+            except (ValueError, TypeError):
+                pass
         
-        # Only rerank if explicitly requested via rerank=True parameter
-        # and reranker is initialized
+        # Need expanded retrieval for date filtering or recency boosting
+        needs_filtering = (date_start or date_end) or recency_boost
+        initial_k = max(rerank_top_k if (rerank or self.use_reranker) else k, k * 3 if needs_filtering else k)
+        
+        # Get results with scores if filtering needed
+        if needs_filtering:
+            results_with_scores = self.vector_store.similarity_search_with_score(question, k=initial_k, filter=filter)
+            if not results_with_scores:
+                return []
+            
+            # Filter by date range
+            filtered = []
+            for doc, score in results_with_scores:
+                if date_start or date_end:
+                    try:
+                        doc_date = datetime.fromisoformat(doc.metadata.get("content_date", ""))
+                        if (date_start and doc_date < date_start) or (date_end and doc_date > date_end):
+                            continue
+                    except (ValueError, TypeError):
+                        if date_start or date_end:
+                            continue
+                
+                # Calculate recency score
+                recency = 0.0
+                if recency_boost and doc.metadata.get("content_date"):
+                    try:
+                        days_ago = (datetime.now() - datetime.fromisoformat(doc.metadata["content_date"])).days
+                        recency = 1.0 / (1.0 + days_ago / 365.0)
+                    except (ValueError, TypeError):
+                        pass
+                
+                # Combine similarity (70%) and recency (30%)
+                norm_sim = 1.0 / (1.0 + score) if score > 0 else 0.0
+                filtered.append((doc, 0.7 * norm_sim + 0.3 * recency if recency_boost else score))
+            
+            results = [doc for doc, _ in sorted(filtered, key=lambda x: x[1], reverse=recency_boost)[:k]]
+        else:
+            results = self.vector_store.similarity_search(question, k=initial_k, filter=filter)
+            if not results:
+                return []
+        
         if rerank and self.use_reranker:
             results = self.reranker.rerank(question, results, top_k=k)
         

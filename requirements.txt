@@ -3,3 +3,13 @@ langchain-groq
 python-dotenv
 langchain-tavily
 tavily-python
+langchain-chroma
+langchain-voyageai
+langchain-text-splitters
+langchain-community
+langgraph
+chromadb
+pypdf
+rank-bm25
+cohere
+supabase

@@ -1,0 +1,52 @@
+2CARE HEALTHCARE SOLUTIONS PVT LTD
+Company Overview & Mission Statement
+
+Founded: 2019
+Headquarters: Bengaluru, Karnataka, India
+Employees: 450+ across India, US, and Singapore
+Website: www.2care.health
+
+ABOUT 2CARE:
+2Care is a leading healthcare technology company that provides comprehensive digital health solutions to hospitals, clinics, and healthcare providers across Asia-Pacific. Our cloud-based platform integrates patient management, telemedicine, electronic health records (EHR), and AI-powered diagnostics.
+
+MISSION:
+To democratize quality healthcare by making advanced medical technology accessible and affordable to healthcare providers of all sizes.
+
+VISION:
+Becoming the #1 healthcare SaaS platform in Asia-Pacific by 2027, serving 10,000+ healthcare facilities and improving outcomes for 50 million patients.
+
+CORE VALUES:
+- Patient-First: Every feature designed with patient outcomes in mind
+- Innovation: Leveraging AI/ML for better diagnostics and predictions
+- Accessibility: Making enterprise-grade healthcare IT affordable for small to large providers
+- Compliance: HIPAA, ISO 27001, GDPR, and local healthcare regulations adherence
+- Collaboration: Partnering with doctors, hospitals, and medical institutions
+
+PRODUCTS & SERVICES:
+1. 2Care Cloud EHR - Electronic Health Records system
+2. 2Care Telehealth - Video consultation platform
+3. 2Care Analytics - AI-powered patient insights and predictive analytics
+4. 2Care Pharmacy - Integrated pharmacy management system
+5. 2Care Billing - Revenue cycle management and insurance claims
+6. 2Care Mobile - Patient engagement mobile app
+7. 2Care Labs - Laboratory information system integration
+
+MARKET PRESENCE:
+- 2,300+ healthcare facilities using 2Care platform
+- 15 million+ patient records managed
+- 98.5% customer retention rate
+- Present in India, Singapore, Malaysia, Thailand, Indonesia
+
+CERTIFICATIONS:
+- ISO 27001:2013 (Information Security)
+- HIPAA Compliant
+- SOC 2 Type II
+- GDPR Compliant
+- FDA 510(k) cleared for certain AI diagnostic modules
+
+LEADERSHIP TEAM:
+CEO: Dr. Rajesh Kumar (Former Head of Digital Health, Apollo Hospitals)
+CTO: Priya Sharma (Ex-Microsoft, 15 years in healthcare IT)
+CMO: Sarah Lee (Former VP Marketing, Practo)
+CFO: Amit Patel (Ex-Deloitte Healthcare Practice)
+Chief Medical Officer: Dr. James Wong (MD, Stanford Medical School)

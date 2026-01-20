@@ -1,0 +1,190 @@
+2CARE ENGINEERING ORGANIZATION
+Team Structure, Tech Stack & Development Practices
+Last Updated: January 2025
+
+ENGINEERING HEADCOUNT: 187 Engineers
+
+ORGANIZATIONAL STRUCTURE:
+
+CTO: Priya Sharma
+├── VP Engineering (Platform): Vikram Mehta - 68 engineers
+│   ├── Backend Team (22 engineers)
+│   │   ├── Core API Squad (8 engineers) - Node.js, Express, PostgreSQL
+│   │   ├── Integration Squad (7 engineers) - HL7, FHIR, third-party APIs
+│   │   └── Performance Squad (7 engineers) - Optimization, caching, scalability
+│   ├── Frontend Team (18 engineers)
+│   │   ├── Web App Squad (12 engineers) - React, TypeScript, Tailwind
+│   │   └── Component Library Squad (6 engineers) - Design system, reusable components
+│   ├── Mobile Team (12 engineers)
+│   │   ├── iOS Squad (6 engineers) - Swift, SwiftUI
+│   │   └── Android Squad (6 engineers) - Kotlin, Jetpack Compose
+│   ├── DevOps & Infrastructure (16 engineers)
+│   │   ├── Cloud Infrastructure Squad (8 engineers) - AWS, Terraform, Kubernetes
+│   │   ├── Security Squad (5 engineers) - Compliance, penetration testing, security audits
+│   │   └── Observability Squad (3 engineers) - Monitoring, logging, alerting
+│
+├── VP Engineering (Product): Sarah Chen - 72 engineers
+│   ├── EHR Product Team (24 engineers)
+│   │   ├── Clinical Documentation Squad (8 engineers)
+│   │   ├── Patient Management Squad (8 engineers)
+│   │   └── E-Prescribing Squad (8 engineers)
+│   ├── Telehealth Product Team (15 engineers)
+│   │   ├── Video Platform Squad (8 engineers) - WebRTC, media servers
+│   │   └── Scheduling & Workflow Squad (7 engineers)
+│   ├── Analytics Product Team (18 engineers)
+│   │   ├── Data Engineering Squad (10 engineers) - ETL, data pipelines, Airflow
+│   │   └── BI & Reporting Squad (8 engineers) - Dashboards, custom reports
+│   └── Billing Product Team (15 engineers)
+│       ├── Claims Processing Squad (8 engineers)
+│       └── Payment Integration Squad (7 engineers)
+│
+├── VP AI/ML Engineering: Dr. Robert Kim - 32 engineers
+│   ├── ML Infrastructure Team (12 engineers)
+│   │   ├── MLOps Squad (7 engineers) - Model deployment, monitoring, versioning
+│   │   └── Data Platform Squad (5 engineers) - Feature store, data labeling
+│   ├── Computer Vision Team (10 engineers)
+│   │   └── Medical Imaging Squad - X-ray, CT, MRI analysis models
+│   └── NLP Team (10 engineers)
+│       ├── Clinical NLP Squad (6 engineers) - Medical coding, entity extraction
+│       └── Voice AI Squad (4 engineers) - Speech-to-text for clinical documentation
+│
+└── VP QA & Release Engineering: Linda Nguyen - 15 engineers
+    ├── QA Automation Team (10 engineers)
+    │   ├── Test Automation Squad (6 engineers) - Selenium, Cypress, API testing
+    │   └── Performance Testing Squad (4 engineers) - Load testing, stress testing
+    └── Release Engineering (5 engineers)
+        └── CI/CD Squad - Jenkins, ArgoCD, automated deployments
+
+TECH STACK:
+
+FRONTEND:
+- Framework: React 18, Next.js 14 (for SSR needs)
+- Language: TypeScript (strict mode)
+- State Management: Redux Toolkit, React Query (server state)
+- Styling: Tailwind CSS, shadcn/ui component library
+- Forms: React Hook Form, Zod validation
+- Testing: Jest, React Testing Library, Cypress (E2E)
+- Build: Vite, Webpack (legacy parts)
+
+BACKEND:
+- Primary Language: Node.js (v20 LTS), Express.js
+- Secondary Language: Python 3.11 (FastAPI for ML services)
+- API: RESTful APIs, GraphQL (for complex queries)
+- Authentication: OAuth 2.0, JWT, SAML 2.0
+- Background Jobs: Bull (Redis-based queue)
+- Caching: Redis (primary), Memcached (legacy)
+
+DATABASES:
+- Primary DB: PostgreSQL 15 (Amazon RDS Multi-AZ)
+- Document Store: MongoDB (for unstructured clinical notes)
+- Time-Series: TimescaleDB (for vitals, monitoring data)
+- Search: Elasticsearch 8 (for full-text search across patient records)
+- Data Warehouse: Snowflake (for analytics and reporting)
+
+INFRASTRUCTURE & CLOUD:
+- Cloud Provider: AWS (primary), Google Cloud (DR site)
+- Container Orchestration: Kubernetes (EKS) - 45 production nodes
+- Infrastructure as Code: Terraform, AWS CloudFormation
+- CI/CD: GitHub Actions, Jenkins (legacy), ArgoCD (GitOps)
+- Monitoring: Datadog (APM, infrastructure), Sentry (error tracking)
+- Logging: ELK Stack (Elasticsearch, Logstash, Kibana)
+- Secrets Management: AWS Secrets Manager, HashiCorp Vault
+
+ML/AI STACK:
+- ML Framework: TensorFlow 2.14, PyTorch 2.1
+- Model Serving: TensorFlow Serving, TorchServe
+- MLOps: MLflow (experiment tracking), Kubeflow (pipelines)
+- Data Processing: Apache Spark, Pandas, Dask
+- Computer Vision: OpenCV, Albumentations
+- NLP: Hugging Face Transformers, spaCy, Custom BERT models
+- Vector DB: Pinecone (for semantic search in clinical notes)
+
+MOBILE:
+- iOS: Swift 5.9, SwiftUI, Combine
+- Android: Kotlin 1.9, Jetpack Compose, Coroutines
+- Cross-platform: React Native (for patient-facing app)
+- Analytics: Firebase Analytics, Mixpanel
+- Crash Reporting: Firebase Crashlytics
+
+DATA & ANALYTICS:
+- ETL: Apache Airflow, dbt (data transformation)
+- BI Tools: Tableau, Looker (embedded analytics)
+- Data Lake: AWS S3 + AWS Glue
+- Real-time Streaming: Apache Kafka, AWS Kinesis
+
+DEVELOPMENT PRACTICES:
+
+AGILE METHODOLOGY:
+- Sprint Length: 2 weeks
+- Sprint Planning: Monday morning (2 hours)
+- Daily Standup: 9:30 AM IST (15 minutes, async on Slack for distributed team)
+- Sprint Review: Friday afternoon (1 hour)
+- Sprint Retrospective: Friday afternoon (1 hour)
+- Refinement: Mid-sprint Wednesday (1 hour)
+
+CODE REVIEW PROCESS:
+- All code requires 2 approvals before merge (1 from squad, 1 from outside squad)
+- PR size limit: <500 lines of code (enforced by CI bot)
+- Automated checks: Linting, unit tests, security scans must pass
+- Review SLA: 24 hours for first review, 48 hours for approval
+- Architecture Decision Records (ADRs) required for significant changes
+
+TESTING REQUIREMENTS:
+- Unit Test Coverage: Minimum 80% for backend, 70% for frontend
+- Integration Tests: Required for all API endpoints
+- E2E Tests: Critical user flows (patient registration, prescription, billing)
+- Performance Tests: Run weekly on staging, before major releases
+- Security Tests: OWASP ZAP scans, dependency vulnerability scans (Snyk)
+
+DEPLOYMENT PROCESS:
+- Staging Deployment: Automatic on merge to develop branch
+- Production Deployment: Tuesdays and Thursdays only (avoid Mondays/Fridays)
+- Deployment Window: 10 PM - 2 AM IST (low traffic period)
+- Canary Releases: 10% traffic → 50% → 100% over 3 hours
+- Rollback Plan: One-click rollback available for 48 hours post-deployment
+- Feature Flags: LaunchDarkly for gradual feature rollout
+
+ON-CALL ROTATION:
+- Primary On-Call: 1-week rotation across all senior engineers
+- Secondary On-Call: Backup for escalations
+- Incidents: Page for P0 (critical outage), Slack alert for P1 (degraded service)
+- Incident Response: War room on Google Meet, postmortem within 48 hours
+- On-Call Compensation: ₹10,000/week on-call allowance + comp time for incidents
+
+DOCUMENTATION:
+- Technical Docs: Maintained in Confluence
+- API Documentation: Auto-generated from OpenAPI specs, hosted on docs.2care.health
+- Runbooks: For common operational tasks, stored in GitHub
+- Architecture Diagrams: C4 model, updated quarterly
+- Onboarding Docs: 2-week onboarding plan for new engineers
+
+SECURITY PRACTICES:
+- Code Scanning: SonarQube for code quality, Checkmarx for SAST
+- Dependency Scanning: Dependabot, Snyk for vulnerability alerts
+- Secrets: No secrets in code (enforced by pre-commit hooks)
+- Access Control: Least privilege principle, annual access reviews
+- Security Training: Mandatory OWASP training for all engineers annually
+- Penetration Testing: External pentests twice yearly
+
+PERFORMANCE BENCHMARKS:
+- API Response Time: p95 < 500ms, p99 < 1 second
+- Web App Load Time: First Contentful Paint < 1.5s
+- Database Query Time: 95% of queries < 100ms
+- Deployment Frequency: 15-20 production deployments per month
+- Change Failure Rate: Target < 5%
+- Mean Time to Recovery (MTTR): Target < 1 hour for P0 incidents
+
+INNOVATION TIME:
+- 10% Time: Engineers can spend up to 4 hours/week on learning or side projects
+- Hackathons: Quarterly 2-day internal hackathons
+- Tech Talks: Weekly Friday tech talks (30 minutes, optional)
+- Conference Attendance: Budget for 2 conferences/year per engineer
+- Open Source: Encouraged to contribute (with approval for healthcare-related projects)
+
+HIRING & GROWTH:
+- Hiring Plan 2025: Add 45 engineers (24% growth)
+- Interview Process: Coding round (90 min) → System design (90 min) → Behavioral (60 min) → Hiring manager (45 min)
+- Offer Timeline: Decision within 48 hours of final interview
+- Career Ladder: IC track (Engineer → Senior → Staff → Principal) and Management track
+- Promotion Cycle: Twice yearly (March, September)
+- Internal Mobility: Encouraged after 18 months in current role

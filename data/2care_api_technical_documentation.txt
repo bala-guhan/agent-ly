@@ -1,0 +1,969 @@
+2CARE HEALTHCARE SOLUTIONS
+API Technical Documentation
+API Version: 3.2
+Document Version: 4.1
+Last Updated: January 2026
+Classification: Developer Resources
+
+================================================================================
+OVERVIEW
+================================================================================
+
+The 2care API provides secure, standards-based access to healthcare data and functionality across the 2care platform. Our RESTful API enables developers to integrate 2care capabilities into their applications, build custom workflows, and create innovative healthcare solutions.
+
+Key Features:
+- RESTful architecture following industry best practices
+- OAuth 2.0 and OpenID Connect authentication
+- FHIR R4 compliance for clinical data
+- Comprehensive webhook support for real-time notifications
+- Rate limiting and throttling for system protection
+- Detailed error handling and logging
+- Sandbox environment for development and testing
+- Comprehensive SDKs for popular languages
+
+Base URL:
+- Production: https://api.2care.com/v3
+- Sandbox: https://sandbox-api.2care.com/v3
+
+API Documentation Portal:
+- Interactive API documentation: https://developers.2care.com
+- Developer community: https://community.2care.com
+- Status page: https://status.2care.com
+
+================================================================================
+AUTHENTICATION AND AUTHORIZATION
+================================================================================
+
+OAuth 2.0 Implementation:
+
+The 2care API uses OAuth 2.0 for authentication and authorization. We support multiple OAuth 2.0 grant types depending on your use case:
+
+Authorization Code Grant (Recommended for web applications):
+
+Step 1: Direct user to authorization endpoint
+GET https://auth.2care.com/oauth/authorize
+  ?response_type=code
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=YOUR_REDIRECT_URI
+  &scope=patient:read patient:write
+  &state=RANDOM_STATE_STRING
+
+Step 2: Exchange authorization code for access token
+POST https://auth.2care.com/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+&code=AUTHORIZATION_CODE
+&redirect_uri=YOUR_REDIRECT_URI
+&client_id=YOUR_CLIENT_ID
+&client_secret=YOUR_CLIENT_SECRET
+
+Response:
+{
+  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "tGzv3JOkF0XG5Qx2TlKWIA",
+  "scope": "patient:read patient:write"
+}
+
+Client Credentials Grant (For server-to-server applications):
+
+POST https://auth.2care.com/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+&client_id=YOUR_CLIENT_ID
+&client_secret=YOUR_CLIENT_SECRET
+&scope=system:read system:write
+
+Refresh Token:
+
+POST https://auth.2care.com/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=refresh_token
+&refresh_token=REFRESH_TOKEN
+&client_id=YOUR_CLIENT_ID
+&client_secret=YOUR_CLIENT_SECRET
+
+Using Access Tokens:
+
+All API requests must include the access token in the Authorization header:
+
+GET https://api.2care.com/v3/patients/12345
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Accept: application/json
+
+Available Scopes:
+
+Patient Data:
+- patient:read - Read patient demographics and records
+- patient:write - Create and update patient information
+- patient:delete - Delete patient records (restricted)
+
+Clinical Data:
+- clinical:read - Read clinical observations, conditions, procedures
+- clinical:write - Create and update clinical data
+- medication:read - Read medication information
+- medication:write - Prescribe and update medications
+
+Appointments:
+- appointment:read - View appointment information
+- appointment:write - Schedule and modify appointments
+
+Documents:
+- document:read - Access clinical documents
+- document:write - Upload and update documents
+
+Analytics:
+- analytics:read - Access reporting and analytics data
+
+Administration:
+- user:read - Read user information
+- user:write - Manage user accounts
+- system:admin - Full administrative access (highly restricted)
+
+================================================================================
+FHIR API IMPLEMENTATION
+================================================================================
+
+2care implements FHIR R4 (Fast Healthcare Interoperability Resources) for standardized healthcare data exchange.
+
+FHIR Base URL: https://api.2care.com/v3/fhir
+
+Supported Resources:
+
+Core Clinical Resources:
+- Patient
+- Practitioner
+- Organization
+- Location
+- Encounter
+- Condition
+- Observation
+- Procedure
+- MedicationRequest
+- MedicationStatement
+- AllergyIntolerance
+- Immunization
+- DiagnosticReport
+- DocumentReference
+
+Administrative Resources:
+- Appointment
+- Schedule
+- Slot
+- Coverage
+- Claim
+
+Example: Retrieve Patient Resource
+
+GET https://api.2care.com/v3/fhir/Patient/example-patient-id
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Accept: application/fhir+json
+
+Response:
+{
+  "resourceType": "Patient",
+  "id": "example-patient-id",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2026-01-15T10:30:00Z"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http://hospital.org/mrn",
+      "value": "12345"
+    }
+  ],
+  "active": true,
+  "name": [
+    {
+      "use": "official",
+      "family": "Smith",
+      "given": ["John", "Robert"]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+1-555-123-4567",
+      "use": "home"
+    },
+    {
+      "system": "email",
+      "value": "john.smith@example.com"
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1980-05-15",
+  "address": [
+    {
+      "use": "home",
+      "line": ["123 Main Street"],
+      "city": "Springfield",
+      "state": "IL",
+      "postalCode": "62701",
+      "country": "USA"
+    }
+  ]
+}
+
+FHIR Search:
+
+Search for patients by name:
+GET https://api.2care.com/v3/fhir/Patient?name=Smith
+
+Search for observations by patient and date:
+GET https://api.2care.com/v3/fhir/Observation
+  ?patient=example-patient-id
+  &date=ge2025-01-01
+  &_sort=-date
+
+Search parameters support:
+- Exact matches: ?name=Smith
+- Partial matches: ?name:contains=Smi
+- Date ranges: ?date=ge2025-01-01&date=le2025-12-31
+- Multiple values: ?status=active,suspended
+- Sorting: ?_sort=name, ?_sort=-date (descending)
+- Pagination: ?_count=50&_offset=100
+- Includes: ?_include=Patient:organization
+
+Create FHIR Resource:
+
+POST https://api.2care.com/v3/fhir/Patient
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/fhir+json
+
+{
+  "resourceType": "Patient",
+  "identifier": [
+    {
+      "system": "http://hospital.org/mrn",
+      "value": "67890"
+    }
+  ],
+  "name": [
+    {
+      "family": "Doe",
+      "given": ["Jane"]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1990-08-22"
+}
+
+Update FHIR Resource:
+
+PUT https://api.2care.com/v3/fhir/Patient/example-patient-id
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/fhir+json
+If-Match: W/"1"
+
+{
+  "resourceType": "Patient",
+  "id": "example-patient-id",
+  ... (full resource with updates)
+}
+
+FHIR Batch Operations:
+
+POST https://api.2care.com/v3/fhir
+Content-Type: application/fhir+json
+
+{
+  "resourceType": "Bundle",
+  "type": "batch",
+  "entry": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "Patient"
+      },
+      "resource": {
+        "resourceType": "Patient",
+        ...
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "Patient/123"
+      }
+    }
+  ]
+}
+
+================================================================================
+REST API ENDPOINTS
+================================================================================
+
+Patients API:
+
+Create Patient:
+POST /v3/patients
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Smith",
+  "dateOfBirth": "1980-05-15",
+  "gender": "male",
+  "email": "john.smith@example.com",
+  "phone": "+1-555-123-4567",
+  "address": {
+    "street": "123 Main St",
+    "city": "Springfield",
+    "state": "IL",
+    "zipCode": "62701"
+  },
+  "emergencyContact": {
+    "name": "Mary Smith",
+    "relationship": "spouse",
+    "phone": "+1-555-987-6543"
+  }
+}
+
+Response: 201 Created
+{
+  "id": "pat_1234567890",
+  "firstName": "John",
+  "lastName": "Smith",
+  "mrn": "MRN-2026-001234",
+  "dateOfBirth": "1980-05-15",
+  "createdAt": "2026-01-20T14:30:00Z",
+  "updatedAt": "2026-01-20T14:30:00Z"
+}
+
+Get Patient:
+GET /v3/patients/{patientId}
+
+Response: 200 OK
+{
+  "id": "pat_1234567890",
+  "mrn": "MRN-2026-001234",
+  "firstName": "John",
+  "lastName": "Smith",
+  "dateOfBirth": "1980-05-15",
+  "gender": "male",
+  "email": "john.smith@example.com",
+  "phone": "+1-555-123-4567",
+  "status": "active",
+  "primaryCareProvider": {
+    "id": "prov_9876543210",
+    "name": "Dr. Sarah Johnson"
+  }
+}
+
+Update Patient:
+PATCH /v3/patients/{patientId}
+Content-Type: application/json
+
+{
+  "email": "john.smith.updated@example.com",
+  "phone": "+1-555-999-8888"
+}
+
+Search Patients:
+GET /v3/patients?firstName=John&lastName=Smith&dob=1980-05-15
+
+List Patients with Pagination:
+GET /v3/patients?limit=50&offset=0&sort=lastName
+
+Appointments API:
+
+Create Appointment:
+POST /v3/appointments
+Content-Type: application/json
+
+{
+  "patientId": "pat_1234567890",
+  "providerId": "prov_9876543210",
+  "appointmentType": "office-visit",
+  "startTime": "2026-01-25T10:00:00Z",
+  "duration": 30,
+  "reason": "Annual physical examination",
+  "status": "scheduled"
+}
+
+Response: 201 Created
+{
+  "id": "appt_abc123def456",
+  "patientId": "pat_1234567890",
+  "providerId": "prov_9876543210",
+  "startTime": "2026-01-25T10:00:00Z",
+  "endTime": "2026-01-25T10:30:00Z",
+  "status": "scheduled",
+  "confirmationCode": "CONF-789456",
+  "createdAt": "2026-01-20T14:35:00Z"
+}
+
+Get Appointment:
+GET /v3/appointments/{appointmentId}
+
+Update Appointment:
+PATCH /v3/appointments/{appointmentId}
+{
+  "status": "confirmed",
+  "notes": "Patient confirmed via phone"
+}
+
+Cancel Appointment:
+DELETE /v3/appointments/{appointmentId}
+
+List Appointments:
+GET /v3/appointments
+  ?providerId=prov_9876543210
+  &startDate=2026-01-25
+  &endDate=2026-01-31
+  &status=scheduled,confirmed
+
+Check Availability:
+GET /v3/appointments/availability
+  ?providerId=prov_9876543210
+  &date=2026-01-25
+  &duration=30
+
+Medications API:
+
+Create Medication Order:
+POST /v3/medications
+Content-Type: application/json
+
+{
+  "patientId": "pat_1234567890",
+  "providerId": "prov_9876543210",
+  "medication": {
+    "name": "Lisinopril",
+    "rxnormCode": "314076",
+    "dosage": "10mg",
+    "route": "oral",
+    "frequency": "once daily"
+  },
+  "instructions": "Take one tablet by mouth once daily in the morning",
+  "quantity": 90,
+  "refills": 3,
+  "startDate": "2026-01-20"
+}
+
+Get Medication:
+GET /v3/medications/{medicationId}
+
+List Patient Medications:
+GET /v3/medications?patientId=pat_1234567890&status=active
+
+Observations API (Vital Signs, Labs):
+
+Record Observation:
+POST /v3/observations
+Content-Type: application/json
+
+{
+  "patientId": "pat_1234567890",
+  "encounterId": "enc_xyz789",
+  "observationType": "blood-pressure",
+  "observedAt": "2026-01-20T14:45:00Z",
+  "values": {
+    "systolic": 120,
+    "diastolic": 80,
+    "unit": "mmHg"
+  },
+  "performedBy": "nurse_123456"
+}
+
+Get Observation:
+GET /v3/observations/{observationId}
+
+List Patient Observations:
+GET /v3/observations
+  ?patientId=pat_1234567890
+  &type=blood-pressure,heart-rate
+  &startDate=2026-01-01
+  &endDate=2026-01-20
+  &sort=-observedAt
+
+Documents API:
+
+Upload Document:
+POST /v3/documents
+Content-Type: multipart/form-data
+
+Form Data:
+- file: [binary file data]
+- patientId: pat_1234567890
+- documentType: lab-result
+- description: CBC lab results
+- date: 2026-01-20
+
+Response: 201 Created
+{
+  "id": "doc_pqr789stu012",
+  "patientId": "pat_1234567890",
+  "documentType": "lab-result",
+  "fileName": "cbc_results_20260120.pdf",
+  "fileSize": 245678,
+  "mimeType": "application/pdf",
+  "uploadedAt": "2026-01-20T15:00:00Z",
+  "url": "https://docs.2care.com/secure/doc_pqr789stu012"
+}
+
+Get Document:
+GET /v3/documents/{documentId}
+
+Download Document:
+GET /v3/documents/{documentId}/download
+
+List Patient Documents:
+GET /v3/documents?patientId=pat_1234567890&type=lab-result
+
+Analytics API:
+
+Get Dashboard Metrics:
+GET /v3/analytics/dashboard
+  ?metric=patient-volume,appointment-adherence
+  &startDate=2026-01-01
+  &endDate=2026-01-20
+  &groupBy=day
+
+Response:
+{
+  "metrics": [
+    {
+      "name": "patient-volume",
+      "data": [
+        {"date": "2026-01-01", "value": 45},
+        {"date": "2026-01-02", "value": 52},
+        ...
+      ]
+    },
+    {
+      "name": "appointment-adherence",
+      "data": [
+        {"date": "2026-01-01", "value": 0.92},
+        {"date": "2026-01-02", "value": 0.89},
+        ...
+      ]
+    }
+  ]
+}
+
+Generate Report:
+POST /v3/analytics/reports
+{
+  "reportType": "quality-measures",
+  "parameters": {
+    "measures": ["diabetes-a1c", "blood-pressure-control"],
+    "startDate": "2025-01-01",
+    "endDate": "2025-12-31",
+    "providerIds": ["prov_9876543210"]
+  },
+  "format": "pdf"
+}
+
+================================================================================
+WEBHOOKS
+================================================================================
+
+2care supports webhooks for real-time event notifications.
+
+Setting Up Webhooks:
+
+Create Webhook Subscription:
+POST /v3/webhooks
+Content-Type: application/json
+
+{
+  "url": "https://your-app.com/webhooks/2care",
+  "events": [
+    "patient.created",
+    "patient.updated",
+    "appointment.scheduled",
+    "appointment.cancelled",
+    "document.uploaded"
+  ],
+  "secret": "your_webhook_secret_for_verification"
+}
+
+Response: 201 Created
+{
+  "id": "webhook_abc123",
+  "url": "https://your-app.com/webhooks/2care",
+  "events": ["patient.created", "patient.updated", ...],
+  "status": "active",
+  "createdAt": "2026-01-20T15:30:00Z"
+}
+
+Webhook Payload Format:
+
+POST https://your-app.com/webhooks/2care
+Content-Type: application/json
+X-2Care-Signature: sha256=abc123...
+X-2Care-Event: patient.created
+X-2Care-Delivery-Id: evt_xyz789
+
+{
+  "id": "evt_xyz789",
+  "type": "patient.created",
+  "createdAt": "2026-01-20T15:35:00Z",
+  "data": {
+    "object": {
+      "id": "pat_1234567890",
+      "mrn": "MRN-2026-001234",
+      "firstName": "John",
+      "lastName": "Smith",
+      ... 
+    }
+  }
+}
+
+Verifying Webhook Signatures:
+
+const crypto = require('crypto');
+
+function verifyWebhookSignature(payload, signature, secret) {
+  const hmac = crypto.createHmac('sha256', secret);
+  const digest = 'sha256=' + hmac.update(payload).digest('hex');
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
+}
+
+Available Events:
+
+Patient Events:
+- patient.created
+- patient.updated
+- patient.deleted
+- patient.merged
+
+Appointment Events:
+- appointment.scheduled
+- appointment.updated
+- appointment.cancelled
+- appointment.no-show
+- appointment.completed
+
+Clinical Events:
+- observation.recorded
+- medication.prescribed
+- medication.dispensed
+- condition.diagnosed
+- procedure.performed
+
+Document Events:
+- document.uploaded
+- document.signed
+- document.deleted
+
+Webhook Management:
+
+List Webhooks:
+GET /v3/webhooks
+
+Get Webhook:
+GET /v3/webhooks/{webhookId}
+
+Update Webhook:
+PATCH /v3/webhooks/{webhookId}
+{
+  "events": ["patient.created", "appointment.scheduled"]
+}
+
+Delete Webhook:
+DELETE /v3/webhooks/{webhookId}
+
+Test Webhook:
+POST /v3/webhooks/{webhookId}/test
+
+================================================================================
+RATE LIMITING
+================================================================================
+
+Rate Limits:
+
+Standard Tier:
+- 1,000 requests per hour per API key
+- Burst limit: 100 requests per minute
+
+Professional Tier:
+- 5,000 requests per hour per API key
+- Burst limit: 500 requests per minute
+
+Enterprise Tier:
+- Custom limits based on agreement
+- Dedicated rate limit pools
+
+Rate Limit Headers:
+
+Every API response includes rate limit information:
+
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 987
+X-RateLimit-Reset: 1674234000
+
+When rate limit is exceeded:
+
+HTTP/1.1 429 Too Many Requests
+Content-Type: application/json
+Retry-After: 3600
+
+{
+  "error": {
+    "code": "rate_limit_exceeded",
+    "message": "API rate limit exceeded. Please retry after 3600 seconds.",
+    "retryAfter": 3600
+  }
+}
+
+Best Practices:
+- Implement exponential backoff for retries
+- Monitor rate limit headers
+- Cache responses when appropriate
+- Use webhooks instead of polling for real-time updates
+- Contact support for higher limits if needed
+
+================================================================================
+ERROR HANDLING
+================================================================================
+
+Standard Error Response Format:
+
+{
+  "error": {
+    "code": "invalid_request",
+    "message": "The request is missing required parameter 'patientId'",
+    "field": "patientId",
+    "requestId": "req_abc123xyz789"
+  }
+}
+
+HTTP Status Codes:
+
+Success:
+- 200 OK - Request successful
+- 201 Created - Resource created successfully
+- 204 No Content - Successful deletion
+
+Client Errors:
+- 400 Bad Request - Invalid request parameters
+- 401 Unauthorized - Missing or invalid authentication
+- 403 Forbidden - Insufficient permissions
+- 404 Not Found - Resource not found
+- 409 Conflict - Resource conflict (e.g., duplicate)
+- 422 Unprocessable Entity - Validation error
+- 429 Too Many Requests - Rate limit exceeded
+
+Server Errors:
+- 500 Internal Server Error - Server error
+- 502 Bad Gateway - Upstream service error
+- 503 Service Unavailable - Service temporarily unavailable
+- 504 Gateway Timeout - Request timeout
+
+Common Error Codes:
+
+Authentication/Authorization:
+- invalid_token - Access token is invalid or expired
+- insufficient_scope - Token lacks required scope
+- invalid_credentials - Invalid client credentials
+
+Validation:
+- invalid_request - Malformed request
+- missing_parameter - Required parameter missing
+- invalid_parameter - Parameter value is invalid
+- validation_error - Data validation failed
+
+Resource:
+- resource_not_found - Requested resource doesn't exist
+- resource_conflict - Resource already exists
+- resource_deleted - Resource has been deleted
+
+System:
+- rate_limit_exceeded - Too many requests
+- server_error - Internal server error
+- service_unavailable - Service temporarily down
+
+================================================================================
+SDKS AND LIBRARIES
+================================================================================
+
+Official SDKs:
+
+Node.js:
+npm install @2care/api-client
+
+const TwoCare = require('@2care/api-client');
+const client = new TwoCare({ apiKey: 'your_api_key' });
+
+const patient = await client.patients.create({
+  firstName: 'John',
+  lastName: 'Smith',
+  dateOfBirth: '1980-05-15'
+});
+
+Python:
+pip install twocare
+
+from twocare import TwoCareClient
+
+client = TwoCareClient(api_key='your_api_key')
+patient = client.patients.create(
+    first_name='John',
+    last_name='Smith',
+    date_of_birth='1980-05-15'
+)
+
+Java:
+<dependency>
+    <groupId>com.2care</groupId>
+    <artifactId>2care-java</artifactId>
+    <version>3.2.0</version>
+</dependency>
+
+import com.twocare.TwoCareClient;
+import com.twocare.model.Patient;
+
+TwoCareClient client = new TwoCareClient("your_api_key");
+Patient patient = client.patients().create(
+    new Patient()
+        .setFirstName("John")
+        .setLastName("Smith")
+        .setDateOfBirth("1980-05-15")
+);
+
+C# / .NET:
+Install-Package TwoCare.Api
+
+using TwoCare;
+
+var client = new TwoCareClient("your_api_key");
+var patient = await client.Patients.CreateAsync(new Patient
+{
+    FirstName = "John",
+    LastName = "Smith",
+    DateOfBirth = new DateTime(1980, 5, 15)
+});
+
+PHP:
+composer require 2care/api-client
+
+require_once('vendor/autoload.php');
+use TwoCare\TwoCareClient;
+
+$client = new TwoCareClient('your_api_key');
+$patient = $client->patients->create([
+    'firstName' => 'John',
+    'lastName' => 'Smith',
+    'dateOfBirth' => '1980-05-15'
+]);
+
+Ruby:
+gem install twocare
+
+require 'twocare'
+
+client = TwoCare::Client.new(api_key: 'your_api_key')
+patient = client.patients.create(
+  first_name: 'John',
+  last_name: 'Smith',
+  date_of_birth: '1980-05-15'
+)
+
+================================================================================
+SANDBOX ENVIRONMENT
+================================================================================
+
+The 2care sandbox provides a complete testing environment with sample data.
+
+Sandbox Base URL: https://sandbox-api.2care.com/v3
+
+Features:
+- Full API functionality without affecting production data
+- Pre-populated test patients, providers, and appointments
+- Simulated webhooks
+- Test credit card numbers for payment testing
+- Ability to reset sandbox data
+
+Getting Sandbox Access:
+
+1. Sign up at https://developers.2care.com/sandbox
+2. Receive sandbox API credentials
+3. Use sandbox base URL for all requests
+4. Use test mode tokens for authentication
+
+Test Data Available:
+
+Test Patients:
+- pat_test_123456789 (John Doe, comprehensive medical history)
+- pat_test_987654321 (Jane Smith, minimal history)
+- pat_test_555555555 (Robert Johnson, complex case)
+
+Test Providers:
+- prov_test_111111111 (Dr. Sarah Wilson, Primary Care)
+- prov_test_222222222 (Dr. Michael Chen, Cardiology)
+- prov_test_333333333 (Dr. Emily Rodriguez, Pediatrics)
+
+Resetting Sandbox:
+POST /v3/sandbox/reset
+
+This will restore all test data to initial state.
+
+================================================================================
+BEST PRACTICES
+================================================================================
+
+Security:
+- Never expose API keys in client-side code
+- Rotate API keys regularly
+- Use environment variables for credentials
+- Implement proper token storage on clients
+- Validate webhook signatures
+- Use HTTPS for all requests
+
+Performance:
+- Implement caching where appropriate
+- Use pagination for large result sets
+- Request only needed fields using field selection
+- Use batch operations when updating multiple resources
+- Implement connection pooling
+
+Reliability:
+- Implement retry logic with exponential backoff
+- Handle rate limiting gracefully
+- Monitor API status page
+- Implement circuit breakers
+- Log all API interactions for debugging
+
+Data Integrity:
+- Validate data before sending to API
+- Handle partial failures in batch operations
+- Implement idempotency for critical operations
+- Use transaction IDs for request tracking
+
+================================================================================
+SUPPORT AND RESOURCES
+================================================================================
+
+Developer Portal: https://developers.2care.com
+API Documentation: https://developers.2care.com/docs
+API Reference: https://developers.2care.com/reference
+Code Examples: https://developers.2care.com/examples
+Community Forum: https://community.2care.com
+Status Page: https://status.2care.com
+
+Technical Support:
+- Email: api-support@2care.com
+- Developer Slack: https://2care-dev.slack.com
+- GitHub Issues: https://github.com/2care/api-issues
+
+Office Hours:
+- Weekly developer office hours every Wednesday at 2 PM EST
+- Register: https://developers.2care.com/office-hours
+
+Change Log:
+- API changelog: https://developers.2care.com/changelog
+- Breaking changes announced 90 days in advance
+- Deprecation notices in API responses
+
+================================================================================
+END OF DOCUMENT
+================================================================================

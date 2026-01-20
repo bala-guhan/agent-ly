@@ -1,0 +1,75 @@
+2CARE HEALTHCARE SOLUTIONS
+Q4 2024 Financial Report & Performance Summary
+
+Reporting Period: October 1, 2024 - December 31, 2024
+Report Date: January 15, 2025
+
+EXECUTIVE SUMMARY:
+Q4 2024 was a record quarter for 2Care, with strong revenue growth across all product lines and successful expansion into two new markets. Annual recurring revenue (ARR) grew 34% year-over-year.
+
+FINANCIAL HIGHLIGHTS - Q4 2024:
+
+Total Revenue: $12.3 million (↑ 28% YoY, ↑ 15% QoQ)
+- SaaS Subscription Revenue: $9.8 million (80% of total)
+- Professional Services: $1.8 million (15% of total)
+- Marketplace & Integration Revenue: $0.7 million (5% of total)
+
+Annual Recurring Revenue (ARR): $38.5 million (↑ 34% YoY)
+
+Gross Margin: 72% (up from 68% in Q3 2024)
+Operating Margin: 12% (first profitable quarter)
+Net Income: $1.47 million (vs. loss of $0.8M in Q4 2023)
+
+CUSTOMER METRICS:
+Total Customers: 2,347 (↑ 18% YoY)
+- Enterprise (1000+ beds): 47 customers
+- Mid-Market (100-1000 beds): 384 customers  
+- Small Clinics (<100 beds): 1,916 customers
+
+New Customer Acquisitions (Q4): 127 facilities
+Customer Churn Rate: 1.5% (industry avg: 3-5%)
+Net Revenue Retention: 118%
+Average Contract Value (ACV): $16,400
+
+GEOGRAPHIC BREAKDOWN:
+India: $8.1M (66% of revenue)
+Singapore: $2.3M (19% of revenue)
+Malaysia: $1.1M (9% of revenue)
+Thailand: $0.5M (4% of revenue)
+Indonesia: $0.3M (2% of revenue)
+
+PRODUCT PERFORMANCE:
+2Care Cloud EHR: $6.2M revenue, 1,847 active installations
+2Care Telehealth: $2.8M revenue, 340% growth YoY (COVID tailwind continuing)
+2Care Analytics: $1.9M revenue, 89 enterprise customers
+2Care Pharmacy: $0.9M revenue, 456 pharmacy integrations
+2Care Billing: $0.5M revenue, 234 customers
+
+KEY WINS IN Q4:
+- Secured largest customer: Max Healthcare (42 hospitals, $2.1M ARR)
+- Partnership with Singapore General Hospital for AI diagnostics pilot
+- Launched 2Care Labs integration with top 3 diagnostic chains in India
+- Expanded sales team by 40% to support 2025 growth targets
+
+EXPENSES BREAKDOWN:
+R&D Investment: $3.2M (26% of revenue) - AI/ML capabilities expansion
+Sales & Marketing: $4.1M (33% of revenue) - Enterprise sales team growth
+General & Administrative: $2.8M (23% of revenue)
+Customer Success: $1.2M (10% of revenue)
+
+CASH POSITION:
+Cash & Equivalents: $18.7 million
+Burn Rate: Profitable (positive operating cash flow of $1.2M in Q4)
+Runway: N/A (cash flow positive)
+
+2025 OUTLOOK:
+Revenue Target: $58-62 million (50% growth)
+Path to EBITDA positive for full year 2025
+Plans to expand to Philippines and Vietnam
+Investment focus: AI diagnostics, interoperability, mobile patient app
+
+RISKS & CHALLENGES:
+- Increasing competition from international players entering Asian market
+- Regulatory compliance costs in new markets
+- Healthcare provider budget constraints in some regions
+- Talent acquisition and retention in competitive tech market

@@ -1,5 +1,6 @@
 import warnings
 import time
+from colorama import Fore, Style
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from rag_query.hybrid_search import RAG
@@ -26,8 +27,6 @@ class RAGQuerySystem:
             provider=llm_provider,
             model=llm_model
         )
-        
-        self.timing_stats = {}
     
     def _format_context(self, chunks):
         """Format retrieved chunks into context string with citations."""
@@ -67,59 +66,65 @@ class RAGQuerySystem:
         """
         # Step 1: Retrieve chunks
         retrieval_start = time.time()
-        chunks = self.rag.query(
-            question, 
-            k=k, 
-            rerank=rerank,
-            date_range=date_range,
-            recency_boost=recency_boost
-        )
+        try:
+            chunks = self.rag.query(
+                question, 
+                k=k, 
+                rerank=rerank,
+                date_range=date_range,
+                recency_boost=recency_boost
+            )
+        except Exception as e:
+            error_msg = f"Retrieval failed: {type(e).__name__}: {str(e)}"
+            print(f"{Fore.RED}Error: {error_msg}{Style.RESET_ALL}")
+            total_time = time.time() - retrieval_start
+            return {
+                "answer": f"Error retrieving information: {error_msg}",
+                "citations": [],
+                "timing": {"total": total_time}
+            }
+        
         retrieval_time = time.time() - retrieval_start
         
         if not chunks:
             return {
                 "answer": "No relevant information found in the knowledge base.",
                 "citations": [],
-                "timing": {"retrieval": retrieval_time, "total": retrieval_time}
+                "timing": {"total": retrieval_time}
             }
         
-        # Step 2: Format context
-        formatting_start = time.time()
+        # Step 2: Format context and generate prompt
         context = self._format_context(chunks)
-        formatting_time = time.time() - formatting_start
-        
-        # Step 3: Generate prompt
-        prompt_start = time.time()
         prompt = get_rag_prompt(context, question)
-        prompt_time = time.time() - prompt_start
         
-        # Step 4: Generate answer
+        # Step 3: Generate answer
         llm_start = time.time()
-        answer = self.llm.invoke(prompt)
+        try:
+            answer = self.llm.invoke(prompt)
+        except Exception as e:
+            error_msg = f"LLM invocation failed: {type(e).__name__}: {str(e)}"
+            print(f"{Fore.RED}Error: {error_msg}{Style.RESET_ALL}")
+            total_time = time.time() - retrieval_start
+            return {
+                "answer": f"Error generating answer: {error_msg}",
+                "citations": [],
+                "timing": {"total": total_time}
+            }
         llm_time = time.time() - llm_start
+        total_time = time.time() - retrieval_start
         
         # Get citations
         citations = []
-        for i, chunk in enumerate(chunks, 1):
-            file_name = chunk.metadata.get('file_name', 'Unknown')
-            page = chunk.metadata.get('page', '')
-            citation = {"source": file_name}
-            if page:
-                citation["page"] = page
+        for chunk in chunks:
+            citation = {"source": chunk.metadata.get('file_name', 'Unknown')}
+            if chunk.metadata.get('page'):
+                citation["page"] = chunk.metadata['page']
             citations.append(citation)
-        
-        total_time = retrieval_time + formatting_time + prompt_time + llm_time
         
         return {
             "answer": answer,
             "citations": citations,
             "chunks_count": len(chunks),
-            "timing": {
-                "retrieval": retrieval_time,
-                "formatting": formatting_time,
-                "prompt": prompt_time,
-                "llm": llm_time,
-                "total": total_time
-            }
+            "timing": {"total": total_time}
         }
 

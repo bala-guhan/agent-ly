@@ -52,11 +52,11 @@ for i, question in enumerate(test_queries, 1):
         if doc.metadata:
             print(f"   Metadata: {doc.metadata}")
     
-    # Hybrid search (requires embedding call)
+    # Hybrid search (now integrated in query method)
     print("\n[Hybrid Search Results (Vector + BM25) - Top 3]")
     print("-"*70)
     rate_limit_check()
-    hybrid_results = rag.hybrid_query(question, k=3, alpha=0.5)
+    hybrid_results = rag.query(question, k=3, hybrid_alpha=0.5)
     
     for j, doc in enumerate(hybrid_results, 1):
         print(f"\n{j}. Chunk {j}:")

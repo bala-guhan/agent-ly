@@ -22,6 +22,8 @@ Instructions:
 3. Be concise, accurate, and specific.
 4. If multiple relevant pieces of information exist, synthesize them into a coherent answer.
 5. Do not make up information or use knowledge outside the provided context.
+6. DO NOT add disclaimers, notes, or explanations about source consistency, dates, or versions at the end.
+7. Provide only the direct answer - no meta-commentary or assumptions about source consistency.
 
 Answer:"""
 

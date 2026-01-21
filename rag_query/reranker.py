@@ -1,6 +1,7 @@
 import warnings
 import os
 import sys
+from colorama import Fore, Style
 from pathlib import Path
 from dotenv import load_dotenv
 from typing import List, Optional
@@ -31,14 +32,20 @@ class Reranker:
         if not documents:
             return []
         
-        doc_texts = [doc.page_content for doc in documents]
-        
-        response = self.client.rerank(
-            model=self.model,
-            query=query,
-            documents=doc_texts,
-            top_n=top_k if top_k else len(documents)
-        )
+        try:
+            doc_texts = [doc.page_content for doc in documents]
+            
+            response = self.client.rerank(
+                model=self.model,
+                query=query,
+                documents=doc_texts,
+                top_n=top_k if top_k else len(documents)
+            )
+        except Exception as e:
+            error_msg = f"Reranking failed: {type(e).__name__}: {str(e)}"
+            print(f"{Fore.RED}Error: {error_msg}{Style.RESET_ALL}")
+            # Return original documents if reranking fails
+            return documents[:top_k] if top_k else documents
         
         # Cohere rerank returns a RerankResponse object with a results attribute
         # Handle different possible response structures

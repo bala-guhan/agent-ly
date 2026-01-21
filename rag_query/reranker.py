@@ -47,37 +47,18 @@ class Reranker:
             # Return original documents if reranking fails
             return documents[:top_k] if top_k else documents
         
-        # Cohere rerank returns a RerankResponse object with a results attribute
-        # Handle different possible response structures
-        if hasattr(response, 'results'):
-            results_list = response.results
-        elif isinstance(response, list):
-            results_list = response
-        else:
-            # Try to iterate directly
-            results_list = response
+        # Cohere rerank returns a RerankResponse with results list
+        results_list = response.results if hasattr(response, 'results') else response
         
+        # Extract indices and build reranked document list
         reranked_docs = []
         for result in results_list:
-            # Access the index property - handle different access patterns
-            idx = None
-            
-            # Try to get index as an attribute (not a method)
-            if hasattr(result, 'index'):
-                index_attr = getattr(result, 'index')
-                # Check if it's not a callable (method) - if it's callable, it's the list.index method
-                if not callable(index_attr):
-                    idx = index_attr
-            
-            # If that didn't work, try as dict
+            # Get index - try attribute first, then dict access
+            idx = getattr(result, 'index', None) if not callable(getattr(result, 'index', None)) else None
             if idx is None and isinstance(result, dict):
                 idx = result.get('index')
             
-            # If still None, try accessing via __dict__
-            if idx is None and hasattr(result, '__dict__'):
-                idx = result.__dict__.get('index')
-            
-            # Ensure idx is an integer before using as index
+            # Add document if valid index
             if isinstance(idx, int) and 0 <= idx < len(documents):
                 reranked_docs.append(documents[idx])
         

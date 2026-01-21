@@ -82,12 +82,11 @@ def create_tools(llm_provider: str, llm_model: str):
     
     _general_llm = LLMProvider(provider=llm_provider, model=llm_model)
     
-    _web_search_llm = LLMProvider(provider="groq", model="llama-3.3-70b-versatile")
-    _web_search_structured_llm = _web_search_llm.llm.with_structured_output(QueryReform)
-    
-    # LLM for date extraction from queries (use Groq for speed)
-    date_extraction_llm_provider = LLMProvider(provider="groq", model="llama-3.3-70b-versatile")
-    _rag_date_extraction_llm = date_extraction_llm_provider.llm.with_structured_output(DateExtraction)
+    # Share one Groq LLM instance for both web_search and date extraction (same provider/model)
+    _groq_llm = LLMProvider(provider="groq", model="llama-3.3-70b-versatile")
+    _web_search_llm = _groq_llm
+    _web_search_structured_llm = _groq_llm.llm.with_structured_output(QueryReform)
+    _rag_date_extraction_llm = _groq_llm.llm.with_structured_output(DateExtraction)
     
 
     return [rag_search, supabase_query, web_search]

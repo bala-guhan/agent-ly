@@ -35,10 +35,8 @@ class AgentState(TypedDict, total=False):
 def route_after_decision(state: AgentState) -> str:
     """Route after decision: tools, synthesis, or end."""
     if state.get("direct_answer", False):
-        return END  # Direct answer goes straight to end
-    if state.get("tool_calls"):
-        return "tools"
-    return "synthesis"  # Fallback if no tools and not direct
+        return END
+    return "tools" if state.get("tool_calls") else "synthesis"
 
 
 class EnterpriseAgent:

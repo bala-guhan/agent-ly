@@ -30,23 +30,23 @@ def execute_tools_parallel(state, tools_dict):
             except Exception as e:
                 print(f"{Fore.YELLOW}Warning: Date extraction failed: {e}. Proceeding without date filtering.{Style.RESET_ALL}")
     
-    # Prepare tool arguments - unified pattern
-    tool_args = {
-        "rag_search": {"query": query, "date_start": date_start, "date_end": date_end},
-        "web_search": {"query": query, "conversation_context": conversation_context},
-        "supabase_query": {"query": query}
-    }
+    # Prepare tool arguments dynamically
+    def get_tool_args(tool_name):
+        base = {"query": query}
+        if tool_name == "rag_search":
+            base.update({"date_start": date_start, "date_end": date_end})
+        elif tool_name == "web_search":
+            base["conversation_context"] = conversation_context
+        return base
     
     # Execute tools in parallel
     tool_results = {}
     with ThreadPoolExecutor(max_workers=len(tool_calls)) as executor:
-        futures = {}
-        for tool_name in tool_calls:
-            if tool_name in tools_dict:
-                tool_obj = tools_dict[tool_name]
-                args = tool_args.get(tool_name, {"query": query})
-                future = executor.submit(tool_obj.invoke, args)
-                futures[tool_name] = future
+        futures = {
+            tool_name: executor.submit(tools_dict[tool_name].invoke, get_tool_args(tool_name))
+            for tool_name in tool_calls
+            if tool_name in tools_dict
+        }
         
         # Collect results
         for tool_name, future in futures.items():
